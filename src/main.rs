@@ -729,4 +729,21 @@ fn variable_scope(){
 
 /*
 Memory Management
+Garbage Collection adalah fitur yang banyak di gunakan di dalam bahasa program
+untuk melakukan manajemen memory, seoerti java dan golang.
+secara berkala garbage collection akan memantau data yang tidak di gunakan lagi di memory, dan lalu akan di hapuskan dari memory secara otomatis
+di dalam bahasa pemrograman tanpa garbage collection , biasanya harus melakukan manajemen memory secara manual seperti c/c++
+tanpa garbage collection, kita harus mengalokasikan data secara manual di dalam memory, begitu juga ketika sudah tidak di butuhkan lagi
+kita harus mengahapusnya secara manual di dalam memory
+Rust memiliki pendekatan yang berbeda, rust tidak menggunakan garbage collection, dan juga rust tidak memiliki fitur manual memory management
+
+Stack and heap
+Rust membagi data di dalam memory menjadi dalam dua bagian yaitu stack dan heap.
+stack adala bagian dimana data disimpan dalam struktur dan tumpukan, last in first out, semua data di stack harus yang fixed size
+yang artinya ukuran datanya sudah pasati
+Heap berbeda, heap seperti tempat untuk menyimpan data dimana untuk menyimpan data di heap kita akan melakukan request terhadap heap, lalu didalam heap
+terdapat memory allocator yang berutjuan  untuk menemukan area kosong untuk menyimpan sebuah data dan mengalokasikan data ke area tersebut.
+setalah kita di beri pointer (petunjuk) ke lokasi dimana data itu berada di heap.
+Pointer dari eap berukuran fix sized, oleh karena itu pointer akan di simpan di stack
+Bayangkan saja heap sebagai sebuah gudang yang dimana di dalam gudang memiliki ukuran yang relevan atau bisa besar ataupun kecil
 */
