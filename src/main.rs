@@ -747,3 +747,481 @@ setalah kita di beri pointer (petunjuk) ke lokasi dimana data itu berada di heap
 Pointer dari eap berukuran fix sized, oleh karena itu pointer akan di simpan di stack
 Bayangkan saja heap sebagai sebuah gudang yang dimana di dalam gudang memiliki ukuran yang relevan atau bisa besar ataupun kecil
 */
+
+#[test]
+fn stack_heap(){
+    function_a();
+    function_b();
+}
+
+fn function_a(){
+    let a = 10;
+    let b = String::from("Kurnia");
+    println!("{} {}", a, b);
+}
+fn function_b(){
+    let a = 10;
+    let b = String::from("Raihan");
+    println!("{} {}", a, b);
+}
+
+/*
+ Drop Funciton
+ saat variable keluar dari scopenya, yang artinya tidak bisa di akses lagi, secara otomatis
+ Rust akan memanggil drop function
+ Drop function adalah funciton untuk menghapus data, sehingga akan di bersihkan daari heap ataupun dari stack framenya
+ dan jika rust funciton() sudah selesai dieksekusi, maka funciton() tersebut akan di hapus pula dari Stack Frame
+ oleh karena itu, Rust tidak membutuhkan garbage collection ataupun manual memory management
+*/
+
+/*
+&str dan String
+&str (string slice) adalah tipe data string yang bersifat immutable dan memiliki ukuran tetap (fixed size). Umumnya digunakan untuk merepresentasikan referensi ke teks yang sudah ada, seperti literal string.
+fn main() {
+    let greeting: &str = "Halo, dunia!";
+    println!("{}", greeting);
+}
+Ciri-ciri &str:
+Immutable (tidak bisa diubah isinya).
+
+Fixed size (ukuran sudah diketahui di compile-time).
+
+Disimpan di stack.
+
+Biasanya digunakan untuk string literal ("teks").
+
+Tidak membutuhkan alokasi memory tambahan di heap.
+
+ Apa itu String?
+String adalah tipe data yang bisa menampung teks dinamis dan dapat diubah/ditambahkan (growable). String disimpan di heap karena ukurannya bisa berubah-ubah.
+fn main() {
+    let mut message = String::from("Halo");
+    message.push_str(", dunia!");
+    println!("{}", message);
+}
+
+Ciri-ciri String:
+Growable (bisa ditambah/diubah).
+Contoh: String yang Mutable (Growable)
+fn main() {
+    let mut name = String::from("Kurnia");
+
+    // Menambahkan string
+    name.push_str(" Raihan Ardian");
+
+    // Mengganti karakter tertentu (dengan metode lainnya)
+    // name.replace(), name.pop(), name.insert(), dll
+
+    println!("Nama lengkap: {}", name);
+}
+
+output
+Nama lengkap: Kurnia Raihan Ardian
+
+let mut name → kita buat variabel name yang bisa dimodifikasi (mutable).
+
+String::from("Kurnia") → membuat string baru yang berada di heap.
+
+push_str() → metode untuk menambahkan string ke akhir.
+Perbandingan dengan &str:
+fn main() {
+    let name: &str = "Kurnia";
+    // name.push_str(" Raihan Ardian"); ❌ ERROR: method not found
+}
+
+
+Mutable (bisa dimodifikasi jika dideklarasikan dengan mut).
+
+Disimpan di heap, karena ukurannya tidak diketahui di compile-time.
+
+Ideal untuk teks yang dibangun secara dinamis (misalnya dari input user, hasil parsing, dll).
+
+Rust memiliki tipe data text yang fixed size, yaitu &str (string slice), dan yang bisa mengembang ukurannya, yaitu string
+&str karena ukurannya yang fixed Size, jadi rust akan meyimpannya di stack, sedangkan String karena bisa mengembang, maka disimpan di dalam heap
+maka dari itu &str (string slice) itu fixed size,
+
+String di rust merupakan tipe data text UTF-8, dan bisa berkembang ukurnanya
+ketika kita buat dalam bentuk immutable variable, maka string tidak bisa berkembang
+namun tetap di disimpannya di heap, walaupun kita buatnya menjadi immutable
+ketika kita buat dalam bentuk mutable variable, maka string bisa berkembang di heap
+string juga memiliki method / function untuk memanipulasi data, namun perlu di perhatikan
+ada metod yang digunakan untuk mengubah datanya sendiri, ada juga method yang di gunakan
+untuk mengubah dalam bentuk data baru, tanpa memodifikasi data aslinya
+
+document string slice
+https://doc.rust-lang.org/std/primitive.str.html
+
+doc string
+https://doc.rust-lang.org/stable/std/string/struct.String.html
+*/
+
+#[test]
+fn string_slice(){
+    let name: &str = "   Kurnia Raihan Ardian   ";
+    let trimmed = name.trim();
+
+    println!("{}", name);
+    println!("{}", trimmed);
+
+    /*
+    String slice itu yang berubah adalah variable usernamenya
+    bukan isi dari variablenya
+    */
+    let mut username = "Rai";
+    println!("{}", username);
+
+    username = "Kurnia";
+    println!("{}", username);
+}
+
+#[test]
+fn string_type(){
+    let mut name: String = String::from("Kurnia Raihan");
+    println!("{}", name);
+
+    name.push_str(" Ardian");
+    println!("{}", name);
+
+    let rose = name.replace("Kurnia", "Lexy");
+    println!("{}", name);
+    println!("{}", rose);
+
+}
+
+/*
+Ownership
+Rust menggunakan Ownership untuk melakukan data management di memory
+ownership adalah salah satu fitur unik di rust yang mungkin jarang ada bahasa pemrograman lain
+Ownership wajib di mengerti, karena akan berdampak ke hampir semua fitur di rust
+Ownership adalah fitur yang digunakan oleh Rust untuk menjadikan rust menjadi bahasa pemrograman yang aman dalam
+mengelola data di memory. tanpa harus adanya fitur garbage collection atau manual memory Management
+dan untuk memahami ownership itu membutuhkan waktu untuk mempelajari dan memaami ownershoip
+
+Ownership Rules
+Di dalam rust ownership memiliki sebuah aturan di dalamnya
+Setiap value di rust harus punya owner (variable pemiliki value)
+Dalam satu waktu, hanya boleh ada satu owner
+Ketika owner keluar scope, value akan di hapus
+*/
+
+// Ownership rules
+#[test]
+fn ownership_rules(){
+    // a tidak bisa diakses disini, karna belum di deklarasikan
+    let a = 10; // a bisa di akses mulai dari sini
+
+    { // b tidak bisa diakses disini, karna belum di deklarasikan
+        let b = 20; // b bisa di akses mulai dari sini
+        println!("{}", b);
+    } // scope b selesai, b di hapus, b tidak bisa di akses lagi
+
+    println!("{}", a);
+} // scope a selesai, a di hapus, a tidak bisa di akses lagi
+
+/*
+Data copy
+sesuai aturan di ownership rules, setiap value harus dimiliki oleh satu owner pada satu waktu
+ketika kita berinteraksi dengan data, maka data akan dimiliki oleh satu owner
+semua data yang bersifat fixed size (yang disimpan di stack), ketika kita tambahkan ke variable berbeda (owner baru),
+maka hasilnya adalah data akan di copy, sehingga variable baru (owner baru) akan memiliki data hasil copy dari variable lama (owner lama)
+oleh karena itu, tiap data akan memiliki satu owner pada satu waktu
+contohnya
+#[test]
+fn data_copy(){
+    let a = 10;
+    let b = a; // copy data dari a ke b
+
+    println!("{} {}", a, b);
+}
+TIDAK terjadi perpindahan ownership.
+
+Data pada a disalin (copy) ke dalam variabel b.
+
+Karena tipe data ini sederhana dan ukurannya kecil, Rust secara default menduplikasi nilai ini tanpa memindahkan ownership.
+
+Apakah mutable (mut) mempengaruhi ownership?
+Menambahkan keyword mut pada variabel hanya mempengaruhi apakah nilai variabel bisa diubah atau tidak. Keyword mut tidak mempengaruhi aturan ownership maupun perilaku copy pada Rust:
+
+Variabel mut tidak menyebabkan perpindahan ownership.
+
+Ownership hanya berpindah jika tipenya bukan tipe Copy (seperti String atau Vec) ketika variabel di-assign ke variabel lain tanpa metode khusus seperti .clone().
+
+#[test]
+fn data_copy(){
+    let a = 10;
+    let mut b = a; // copy data dari a ke b
+
+    b = 20;
+
+    println!("{} {}", a, b);
+}
+
+Contoh ownership berpindah (tipe Non-Copy):
+#[test]
+fn ownership_move(){
+    let a = String::from("rai");
+    let b = a; // ownership berpindah ke b
+
+
+    // println!("{}", a); <-- ini ERROR karena ownership sudah pindah
+    println!("{}", b); // aman digunakan
+}
+Jika ingin ownership berpindah pada tipe primitif?
+Pada dasarnya tipe primitif tidak akan pindah ownership secara otomatis. Namun, jika kamu ingin memindahkan ownership tipe primitif, kamu bisa menggunakan tipe seperti Box, yang membuat tipe primitif tersebut tersimpan di heap:
+
+Contoh ownership tipe primitif dengan Box (heap allocation):
+#[test]
+fn ownership_box(){
+    let a = Box::new(10); // integer di heap
+    let b = a; // ownership berpindah ke b (move)
+    // println!("a: {}", a); // Error: ownership sudah pindah ke b
+    println!("{}", b);
+}
+
+Penjelasan:
+
+Variabel a adalah pointer ke heap yang menyimpan angka 10.
+
+Ketika assignment let b = a dilakukan, ownership heap tersebut pindah ke variabel b.
+
+Variabel a menjadi invalid setelah pindah ownership.
+Mengapa Box bisa dipindahkan (move)?
+Box<T> adalah tipe data khusus, yang merupakan sebuah smart pointer di Rust.
+
+Apa itu Box?
+Box adalah tipe data yang menyimpan pointer (alamat memori) ke sebuah lokasi di heap.
+
+Box mengalokasikan memori di heap secara dinamis dan kemudian menyimpan data di heap tersebut.
+
+contohnya
+let a = Box::new(5i32);
+
+visual
+Stack          Heap
++--------+     +--------+
+|   a    | --> |   5    |
++--------+     +--------+
+
+Kenapa Box pindah ownership (bukan copy)?
+Walaupun Box menunjuk ke nilai primitif (i32), yang dimiliki langsung oleh variabel a bukanlah nilai 5 tersebut, melainkan pointer ke heap.
+
+Pointer ke heap tidak memiliki trait Copy secara default.
+
+Oleh karena itu, saat kamu assign variabel a ke b:
+
+let b = a;
+
+yang sebenarnya terjadi adalah
+Stack sebelum move:
+
++--------+
+|   a    | -----> heap [5]
++--------+
+
+Setelah move:
+
++--------+
+|   b    | -----> heap [5]  (b sekarang punya ownership)
++--------+
+
+|   a    | (tidak valid lagi)
+Ownership pointer tersebut berpindah dari variabel a ke variabel b.
+
+Ini menyebabkan a tidak valid lagi setelahnya.
+
+Kenapa integer primitif tidak berpindah ownership?
+Berbeda dengan Box, integer primitif seperti i32, u32, dll., disimpan langsung di stack dan memiliki trait Copy.
+
+Integer primitif di-stack kecil ukurannya, murah untuk di-copy.
+
+Oleh karena itu, Rust secara default meng-copy data primitif saat di-assign ke variabel lain.
+
+let x = 5u32;
+let y = x; // di-copy otomatis, karena integer punya trait Copy.
+
+Stack setelah copy:
+
++--------+
+|   x    | -> 5
++--------+
+|   y    | -> 5
++--------+
+
+Tidak ada perpindahan ownership di sini karena kedua variabel x dan y masing-masing memiliki salinan data sendiri.
+
+Jadi kenapa Box<i32> berpindah ownership padahal isinya primitif?
+Jawabannya:
+
+Yang dimiliki oleh variabel tipe Box<T> bukan langsung nilai primitifnya, tapi pointer-nya.
+
+Pointer (alamat memori) tidak memiliki trait Copy.
+
+Karena pointer ini tidak punya trait Copy, maka ketika kamu assign ke variabel lain, ownership pointer tersebut berpindah, bukan di-copy.
+
+// function ini mengambil kepemilikan (ownership) dari alokasi memori heap
+fn destroy_box(c: Box<i32>){
+    println!("menghancurkan kotak yang berisi {}", c)
+
+    // `c` telah di hancurkan dan di hapus dari memory
+}
+
+#[test]
+fn boxx(){
+    // _Stack_ integer yang di alokasikan di memory stack
+    let x = 5u32;
+
+    // *Copy* `x` ke `y` - tidak ada sumber daya yang di pindakan
+    let y = x;
+
+    // nilai keduanya bisa di gunakan secara independen
+    println!("{} {}", x, y);
+
+    // `a` adalah pointer ke integer yang di alokasikan ke memory _heap_
+    let a = Box::new(5i32);
+
+    println!("berisi sebuah {}", a);
+
+    // *Move* `a` ke `b`
+    let b=a;
+    // alamat sebuah pointer (penunjuk) `a` disalin (bukan datanya) ke `b`
+    // keduanya sekarang adalah sebuah pointer yang sama di alokasi heap yang sama, tapi
+    //`b` sekarang adalah pemilikinya
+
+    // Error! `a` can no longer access the data , because it no longer owns the
+    // heap memory
+    // yang berarti error itu menandakan bahwa variable dari a itu sudah bukan lagi pemiliknya
+    //println!("berisi sebuah: {}", a);
+    // TODO ^ Try uncommenting this line / coba untuk hapus komentarnya
+
+    // fungsi ini mengambil ownership atau kepemilikan dari alokasi heap memori yang berasal dari `b`
+    destroy_box(b);
+    // Since the heap memory has been freed at this point, this action would
+    // result in dereferencing freed memory, but it's forbidden by the compiler
+    // Error! Same reason as the previous Error
+    //println!("b contains: {}", b);
+    // TODO ^ Try uncommenting this line
+}
+
+diagram
+Stack:                     Heap:
++--------+                +---------+
+|   a    | -------------->|   5     |
++--------+                +---------+
+
+// Ownership dipindah (move)
+let b = a;
+
+Stack:                     Heap:
++--------+                 +---------+
+|   b    | --------------->|   5     |
++--------+                 +---------+
+|   a    | (invalid)       (owned by b)
++--------+
+
+// Setelah destroy_box(b) selesai:
+
+Stack:                     Heap:
++--------+                +---------+
+|   b    | (invalid)      |  (deleted)
++--------+                +---------+
+
+*/
+
+#[test]
+fn data_copy(){
+    let a = 10;
+    let mut b = a; // copy data dari a ke b
+
+    b = 20;
+
+    println!("{} {}", a, b);
+}
+
+#[test]
+fn ownership_move(){
+    let a = String::from("rai");
+    let b = a; // ownership berpindah ke b
+
+
+    // println!("{}", a); <-- ini ERROR karena ownership sudah pindah
+    println!("{}", b); // aman digunakan
+}
+
+#[test]
+fn ownership_box(){
+    let a = Box::new(10); // integer di heap
+    let b = a; // ownership berpindah ke b (move)
+    // println!("a: {}", a); // Error: ownership sudah pindah ke b
+    println!("{}", b);
+}
+
+// function ini mengambil kepemilikan (ownership) dari alokasi memori heap
+fn destroy_box(c: Box<i32>){
+    println!("menghancurkan kotak yang berisi {}", c)
+
+    // `c` telah di hancurkan dan di hapus dari memory
+}
+
+#[test]
+fn boxx(){
+    // _Stack_ integer yang di alokasikan di memory stack
+    let x = 5u32;
+
+    // *Copy* `x` ke `y` - tidak ada sumber daya yang di pindakan
+    let y = x;
+
+    // nilai keduanya bisa di gunakan secara independen
+    println!("{} {}", x, y);
+
+    // `a` adalah pointer ke integer yang di alokasikan ke memory _heap_
+    let a = Box::new(5i32);
+
+    println!("berisi sebuah {}", a);
+
+    // *Move* `a` ke `b`
+    let b=a;
+    // alamat sebuah pointer (penunjuk) `a` disalin (bukan datanya) ke `b`
+    // keduanya sekarang adalah sebuah pointer yang sama di alokasi heap yang sama, tapi
+    //`b` sekarang adalah pemilikinya
+
+    // Error! `a` can no longer access the data , because it no longer owns the
+    // heap memory
+    // yang berarti error itu menandakan bahwa variable dari a itu sudah bukan lagi pemiliknya
+    //println!("berisi sebuah: {}", a);
+    // TODO ^ Try uncommenting this line / coba untuk hapus komentarnya
+
+    // fungsi ini mengambil ownership atau kepemilikan dari alokasi heap memori yang berasal dari `b`
+    destroy_box(b);
+    // Since the heap memory has been freed at this point, this action would
+    // result in dereferencing freed memory, but it's forbidden by the compiler
+    // Error! Same reason as the previous Error
+    //println!("b contains: {}", b);
+    // TODO ^ Try uncommenting this line
+}
+
+/*
+Clone
+Sekarang kita tahu bahwa data di stack akan di copy sedangkan data di heap akan di pindahkan ownershipnya
+lantas bagaimana jika kita juga ingin melakukan copy untuk data di heap?
+maka kita harus melakukan clone
+Clone adalah sebuah data tiruan yang sama dari data aslinya
+String memiliki method clone() untuk melakukan ini
+saat kita memanggil method clone() maka method tersebut akan meng-copy data String menjadi string baru
+semua tipe data yang disimpan di heap di rust memiliki method clone()
+contohnya
+fn clone(){
+let name1 = String::from("rai);
+let name2 = name1.clone();
+println!("{}{}", name1, name2);
+}
+perlu di ingat jika menggunakan clone ini prosess dari clone tersebut akan lebih berat, karna dia akan membuat data yang sama,
+jika data awalnya sebesar 10 mega, maka data yang baru di buat nanti akan memiliki besar yang sama
+*/
+
+#[test]
+fn clone(){
+    let name1 = String::from("rai");
+    let name2 = name1.clone();
+
+    println!("{} {}", name1, name2);
+}
