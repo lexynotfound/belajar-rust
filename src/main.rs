@@ -1102,6 +1102,8 @@ fn boxx(){
     // TODO ^ Try uncommenting this line
 }
 
+https://doc.rust-lang.org/rust-by-example/scope/move.html
+
 diagram
 Stack:                     Heap:
 +--------+                +---------+
@@ -1225,3 +1227,416 @@ fn clone(){
 
     println!("{} {}", name1, name2);
 }
+
+/*
+If Expression
+if expression di gunakan unutk perkondisian percabangan, kalau nilainya true maka akan di eksekusi
+dan penulisan if di dalam rust hampir sama dengan golang
+*/
+
+#[test]
+fn if_expression(){
+    let value = 9;
+
+    if value >= 8{
+        println!("{}", value);
+    } else {
+        println!("Not good");
+    }
+}
+
+/*
+Else If Expression
+*/
+#[test]
+fn elseif_expression(){
+    let value = 9;
+
+    if value >= 8{
+        println!("{}", value);
+    } else if value >= 6 {
+        println!("Not Bad");
+    } else if value >= 3{
+        println!("So bad");
+    } else {
+        println!("Very bad");
+    }
+}
+
+/*
+Let Statement
+If di rust adalah sebuah expression, artinya bisa menghasilkan value dan bisa
+digunakan dengan Let Statement untuk mengisi data di variable
+ini sangat berguna sehingga kita tidak perlu memasukkan nilai variable terpisah dengan deklarasi variablenya
+ini contoh let statement yang rumit atau manual
+#[test]
+fn letstatement(){
+    let value = 9;
+    let result: &str;
+
+    if value >= 8{
+        result = "Good"
+    } else if value >= 6 {
+        result = "Not Bad"
+    } else if value >= 3{
+        result = "Bad"
+    } else {
+        result = "Very Bad"
+    }
+    println!("{}", result);
+}
+kita bisa menggunakan secara otomatis dengan if expression di gabung dengan let statement
+#[test]
+fn letstatement(){
+    let value = 9;
+    let result = if value >= 8{
+        "Good"
+    } else if value >= 6 {
+        "Not Bad"
+    } else if value >= 3 {
+        "Bad"
+    } else {
+        "very Bad"
+    };
+    println!("{}", result);
+}
+*/
+
+#[test]
+fn letstatement(){
+    let value = 9;
+    let result = if value >= 8{
+        "Good"
+    } else if value >= 6 {
+        "Not Bad"
+    } else if value >= 3 {
+        "Bad"
+    } else {
+        "very Bad"
+    };
+    println!("{}", result);
+}
+/*
+Loop
+Setiap bahasa pemrograman biasanya memiliki fitur untuk melakukan perulangan
+Rust mendukung bebecarap cara untuk melakukan perulangan, pertama kita akan bahasa tentang loop
+Loop merupakan perinta di Rust digunakan untuk melakukan perulangan terus-menerus, sampai kita memerintahkannya untuk berhenti
+jika kita tidak memerintahkan untuk berhenti, maka loop tidak akan berhenti melakukan perulangan
+Unutk menghentikan perulangan, kita bisa menggunakan perintab break
+Selain break, ada juga perintah continue, yang artinya  menghentikan perulangan saaat ini, dan langsung di lanjutkan
+ke perulangan berikutnya
+
+*/
+#[test]
+fn loop_expression(){
+    let mut counter = 0;
+    loop{
+        counter += 1;
+        if counter > 10 {
+            break;
+        } else if counter % 2 == 0{
+            continue;
+        }
+
+        println!("Counter {}", counter);
+    }
+}
+
+/*
+Loop Reutn Value
+Sama seperti if expression, di loop juga bisa mengembalikan sebuah nilai
+*/
+
+#[test]
+fn loop_return_value(){
+    let mut counter = 0;
+    let result = loop {
+        counter += 1;
+        if counter > 100 {
+            break counter *2;
+        }
+    };
+
+    println!("Counter {}", result);
+}
+
+/*
+Loop Label
+Terkadang kita sering membuat Loop didalam loop, dan ketika ingin menghentikan loop paling atas dari loop
+yang ada di dalam, maka hal itu tidak bisa di lakukan
+loop memiliki fitur label, dimana kita bisa memberi nama pada loop
+keuntungannya memberi label pada loop adalah, kita bisa menghentikan loop yang ingin kita hentikan dengan cara menyebutkan nama Labelnya
+*/
+
+#[test]
+fn loop_label(){
+    let mut counter = 0;
+    'outer: loop {
+        let mut i = 1;
+        loop {
+            if counter > 100 {
+                break 'outer;
+            }
+
+            println!("{} X {} = {} ",counter, i, counter * i);
+            i += 1;
+            if i > 100 {
+                break;
+            }
+        }
+        counter += 1;
+    }
+
+}
+
+/*
+While loop adalah jenis perulangan dimana memiliki kondisi
+jika kondisi masih terpenuhi, maka perulangan akan di lanjutkan
+namun jika perulangan tidak terpenuhi, maka perulangan akan di hentikan
+while loop mirip seperti loop, bisa di hentikan menggunakan break dan continue
+dan di dalam while loop kalian bisa juga menggunakan break ataupun continue
+*/
+#[test]
+fn while_loop(){
+    let mut counter = 0;
+    while counter < 10 {
+        if counter % 2 == 0 {
+            println!("Counter : {}", counter);
+        }
+        counter += 1;
+    }
+}
+
+/*
+Iterasi Array
+Salah satu yang biasa kita lakukan ketika menggunakan array adalah, melakukan pengambilan semua data
+di array dari data pertama sampai data terakhir.
+Biasanya, kita akan menggunakan while loop, lalu membuat variable untuk mengakses indexnya
+
+For Loop
+Di dalam Rust menyediakan cara yang mudah untuk melakukan pengambilan data dari array menggunakan for loop
+*/
+
+#[test]
+fn array_iteration(){
+    let array: [&str; 5] = ["A", "B", "C", "D", "E"];
+    let mut index = 0;
+
+    while index < array.len(){
+        println!("{}", array[index]);
+        index += 1;
+    }
+}
+
+#[test]
+fn array_iteration_for_loop(){
+    let array: [&str; 5] = ["A", "B", "C", "D", "E"];
+
+    for value in array {
+        println!("Value {}", value);
+    }
+}
+
+/*
+Rust memiliki tipe data bernama range
+range adalah jarak antara start dan end
+range merupakan tipe data collection seperti namanya array, sehingga bisa melakukan pengulangan menggunakan for loop
+data range akan di mulai dari start (inclusive) dan di akhiri sebelum end (exlusive)
+pub struct Range<Idx> {
+    pub start: Idx,
+    pub end: Idx,
+}
+https://doc.rust-lang.org/stable/std/ops/struct.Range.html
+Range inclusive
+selain range yang exclusive, rust juga memiliki tipe data Range exclusive
+implementasinya berbeda dengan range sebelumnya
+https://doc.rust-lang.org/stable/std/ops/struct.RangeInclusive.html
+*/
+
+#[test]
+fn range(){
+    let array: [&str; 5] = ["A", "B", "C", "D", "E"];
+
+    let range = 0..5;
+    println!("Start: {}", range.start);
+    println!("End: {}", range.end);
+
+    for i in range {
+        println!("{}", array[i]);
+    }
+}
+
+#[test]
+fn range_inclusive(){
+    let array: [&str; 5] = ["A", "B", "C", "D", "E"];
+
+    let range = 0..=4;
+    println!("Start: {}", range.start());
+    println!("End: {}", range.end());
+
+    for i in range {
+        println!("{}", array[i]);
+    }
+}
+
+/*
+Function
+function adalaah kumpulan kode yang memiliki nama, dan kegunaannya bisa di panggil
+sebelumnya kita sudah tahu tentang main function, yaitu funciton yang di panggil oleh ketika aplikasi berjalan
+untuk membuat function, kita menggunakan kata kunci fn dan di ikuti nama functionnya
+tradisi nama function / variable di rust menggunakan format snake_case, yaitu huruf kecil semua dan pemisah kata menggunakan _ (garis bawah)
+untuk memanggil function, kita bisa langsung sebutkan nama function-nya diikuti dengan kurung buka dan kurung tutup
+
+*/
+
+fn say_hello(){
+    println!("Hello");
+}
+
+#[test]
+fn test_say_hello(){
+    say_hello();
+    say_hello();
+    say_hello();
+}
+
+/*
+Parameters
+saat kita membuat funciton, kita bisa menambahkan parameter, yaitu variable yang menjadi bagian dari definisi funcitonnya
+ketika funciton memiliki parameter, maka kita wajib memberi value untuk parameter tersebut ketika memanggil funcitonnya
+beberapa orang memanggil parameter dengan argument, jadi jangan terlalu bingung
+parameter di function bisa satu atua lebih, dan tiap parameter bisa menggunakna tipe data apapun yang kita inginkan
+*/
+
+fn say_goodbye(first_name: &str, las_name: &str){
+    println!("{}, {}", first_name, las_name);
+}
+
+#[test]
+fn parameters_say_goodbye(){
+    say_goodbye("Rai", "Raihan");
+    say_goodbye("Raihan", "Raihan");
+    say_goodbye("Raihan", "Raihan");
+}
+
+/*
+Return Value
+saat membuat funciton, kadang kita ingin mengembalikan hasil eksekusi yang di lakukan di dalam funciton,
+atau bisa sebut return value
+jika sebuah function ingin mengembalikan value, kita bisa sebutkan ketika deklarasi funciton menggunakan tanda -> lalu di ikuti dengan tipe data kembalian valuenya
+baris eksekusi terakhir di funciton akan dianggap sebagai kembalian value-nya
+atau jika kita ingin mengembalikan value sebelum baris eksekusi terakhir, kita bisa gunakan kata kunci return, dan diikuti dengan value
+yang akan di kembalikan
+*/
+
+// Return Value
+fn factorial_loop(n:i32) -> i32 {
+    if n < 1 {
+        return 0;
+    }
+
+    let mut result = 1;
+    for i in 1..=n {
+        result *= i;
+    }
+
+    result
+}
+
+#[test]
+fn test_factorial_loop(){
+    let result = factorial_loop(10);
+    println!("Result: {}", result);
+
+    let result = factorial_loop(-10);
+    println!("Result: {}", result);
+
+}
+
+/*
+Recursive Function
+Recursion merupakan salah satu metode pemecahan masalah diman sebuah solusi pada masalah tersebut bergantung pada solusi dari masalah
+yang lebih kecil yang merupakan bagian dari masalah tersebut.
+Rust mengimplementasikan recursion dengan memperbolehkan sebuah fungsi untuk memanggil dirinya sendiri (fungsi itu sendiri)
+fungsi yang memanggil fungsi itu sendiri biasanya disebut dengan Recursive Function
+Misal kita akan buat dua contoh kasus, pertama kita melakukan println tulisan sebanyak parameter menggunakan recursive function. Kedua kita akan ubah factorial
+sebelumnya menjadi recursive function
+*/
+
+fn print_text(value: String, times: u32){
+    if times == 0 {
+        return;
+    } else {
+        println!("{}", value);
+    }
+
+    print_text(value, times - 1);
+}
+
+#[test]
+fn test_print_text(){
+    print_text(String::from("Hello"), 10);
+}
+
+fn factorial_recursive(n:u32) -> u32 {
+    if n == 1{
+        return 1;
+    }
+
+    n * factorial_recursive(n - 1)
+}
+
+#[test]
+fn test_factorial_recursive(){
+    let result = factorial_recursive(10);
+    println!("Result: {}", result);
+}
+
+/*
+Ownership dan Function
+setelah kita tahu tentang funciton, kita akan bahas lagi tentang Ownership di function parameter
+tipe data yang disimpan di heap, ketika kita kirim sebagai parameter di function, secara otomatis Ownershipnya akan berpindah
+ke parameter function yang di panggil
+karena Ownershipnya berpindah ke parameter function, secara otomatis setalh funciton selesai di eksekusi, maka owner dan value akan di hapus
+dan tidak bisa di gunakan lagi
+Namun jenis data yang berada di stack, ketika kita kirim sebagai parameter di funciton maka value akan di copy
+#[test]
+fn test_hi(){
+// kode dibawah ini di copy
+    let number = 10;
+    print_number(number);
+    println!("Number: {}", number);
+
+    // kode dibawah ini akan error karna valuenya sudah di pindah di hi(name)
+    let name = String::from("Rai");
+    hi(name); // Value Moved here
+    println!("Name: {}", name); // name di samping ini dia akan error yang di karenkan namenya sudah tidak ada data lagi di dalamnya
+}
+
+#Kode dibawah ini merupakan sebuah ownership function
+#sebenernya ownership name rai ini di pindahkan kepada parameter ini nmae: String
+fn hi(nmae: String){
+    println!("Hi, {}", nmae);
+}
+*/
+
+//Funciton Ownership
+fn print_number(number: i32){
+    println!("number: {}", number);
+}
+
+fn hi(nmae: String){
+    println!("Hi, {}", nmae);
+}
+
+#[test]
+fn test_hi(){
+    let number = 10;
+    print_number(number);
+    println!("Number: {}", number);
+
+    let name = String::from("Rai");
+    hi(name); // Value Moved here
+    // println!("Name: {}", name); // this code got error because Value used after being moved [E0382]
+}
+
