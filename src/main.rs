@@ -1643,5 +1643,452 @@ fn test_hi(){
     // println!("Name: {}", name); // this code got error because Value used after being moved [E0382]
 }
 
+/*
+Return Value Ownership
+seperti yang sudah kita tahu, bahwa funciton bisa mengembalikan value
+value heap yang kita kembalikan di function, secara otomatis ownershipnya akan dimiliki oleh yang memanggil funciton
+tersebut
+sedangkan jika value stack, maka return value function akan di copy oleh yang memanggil function nya
+*/
+
+fn full_name(first_name: String, last_name: String) -> String{
+    format!("{} {}", first_name, last_name)
+}
+
+#[test]
+fn test_full_name(){
+    let first_name = String::from("Rai");
+    let last_name = String::from("Ardila");
+
+    let name = full_name(first_name, last_name); // Value Moved here
+    println!("Name: {}", name);
+    // println!("{}", first_name);
+    // println!("{}", last_name);
+
+}
+
+/*
+Mengembalikan Ownership
+Karena kita tahu bahwa return value bisa mengembalikan ownership, jadi pada kasus jika memang kita tidak ingin
+mengambil ownership dari parameter, kita bisa kembalikan parameter dalam bentuk return value dalam bentuk tuple
+contoh yang salah
+
+#[test]
+fn test_tuple_full_name(){
+    let first_name = String::from("Rai");
+    let last_name = String::from("Ardila");
+
+    let full_name(first_name, last_name, name); // Value Moved here
+    println!("Name: {}", name);
+    println!("{}", first_name);
+    println!("{}", last_name);
+
+}
+
+akan muncul error ini
+error[E0532]: expected a pattern, found a function call
+    --> src/main.rs:1687:9
+     |
+1687 |     let full_name(first_name, last_name, name); // Value Moved here
+     |         ^^^^^^^^^ not a tuple struct or tuple variant
+     |
+     = note: function calls are not allowed in patterns: <https://doc.rust-lang.org/book/ch19-00-patterns.html>
+
+ini contoh yang benar
+#[test]
+fn test_tuple_full_name(){
+    let first_name = String::from("Rai");
+    let last_name = String::from("Ardila");
+
+    let (first_name, last_name, name) = tuple_full_name(first_name,last_name); // Value Moved here
+    println!("Name: {}", name);
+    println!("{}", first_name);
+    println!("{}", last_name);
+
+}
+dia akan mengembalikan ownershipnya
+
+catatan
+Masalah dengan return value ownership
+jika kita itdak ingin mengambil ownership dari parameter, maka jika tiap membuat function kita harus membuat return value tuple, maka lama-lama akan sangan menyulitkan
+bahkan jika di baca, function yang kita buat akan sulit di mengerti maksudnya
+untungnya rust menyediakan fitur untuk menggunakan value, tanpa harus melakukan transfer ownership, namanya adalah reference
+kita akan bahas reference di materi selanjutnya
+*/
+
+fn tuple_full_name(first_name: String, last_name: String) -> (String, String, String){
+    let full_name = format!("{} {}", first_name, last_name);
+
+    (full_name, first_name, last_name)
+}
+
+#[test]
+fn test_tuple_full_name(){
+    let first_name = String::from("Rai");
+    let last_name = String::from("Ardila");
+
+    let (first_name, last_name, name) = tuple_full_name(first_name, last_name); // Value Moved here
+    println!("Name: {}", name);
+    println!("{}", first_name);
+    println!("{}", last_name);
+
+}
+
+/*
+References dan Borrowing
+Reference adalah pointer (penunjuk) yang bisa kita ikuti ke lokasi data aslinya di Heap.
+Datanya sendiri dimiliki oleh variable lain, bukan si reference
+Reference akan di jamin menunjuk value yang valid selama alur hidup reference tersebut, jika alur hidup selesai, maka reference akan dihapus, namun tidak dengan data
+yang di tunjuknya, karena data yang di tunjuk mengikuti alur hidup variable ownernya
+Untuk membuat reference di Rust, kita bisa gunakan tanda & (and) sebelum tipe datanya, dan dalam satu waktu kita bisa membuat banyak references
+Sebelumnya kita tahu bahwa tipe data text str selalu kita buat dalam bentuk &str di depannya ada &, hal ini karena defaultnya &Str (string slice) itu adalah reference ke str
+
+// Reference
+fn reference_full_name(first_name: &String, last_name: &String) -> String{
+    format!("{} {}", first_name, last_name)
+}
 
 
+#[test]
+fn test_reference_full_name(){
+    let first_name = String::from("Rai");
+    let last_name = String::from("Ardila");
+
+    // di bawah ini akan error Type mismatch [E0308]expected `&String`, but found `String` karna tidak di tambahkan & sebelum first_name dan last_namenya
+    let name = reference_full_name(first_name, last_name); // Type mismatch [E0308]expected `&String`, but found `String`
+    println!("Name: {}", name);
+    println!("{}", first_name);
+    println!("{}", last_name);
+
+}
+
+ini yang benar
+#[test]
+fn test_reference_full_name(){
+    let first_name = String::from("Rai");
+    let last_name = String::from("Ardila");
+
+    // di bawah ini contoh variable atau kode yang benar
+    let name = reference_full_name(&first_name, &last_name);  // di bawah ini contoh variable atau kode yang benar
+    println!("Name: {}", name);
+    println!("{}", first_name);
+    println!("{}", last_name);
+
+}
+
+*/
+
+// Reference
+fn reference_full_name(first_name: &String, last_name: &String) -> String{
+    format!("{} {}", first_name, last_name)
+}
+
+#[test]
+fn test_reference_full_name(){
+    let first_name = String::from("Rai");
+    let last_name = String::from("Ardila");
+
+    let name = reference_full_name(&first_name, &last_name); // Reference harus ada & sebelum first_name dan last_name
+    println!("Name: {}", name);
+    // println!("{}", first_name); // Uncomment untuk melihat hasilnya
+    // println!("{}", last_name); // UNcoment untuk melihat hasilnya
+
+}
+
+/*
+Borrowing
+Ketika kita membuat reference, aksi itu kita sebut borrowing (meminjam).
+Kalo diibaratkan di kehidupan, kita bisa meminjam barang, tapi jika sudah selesai menggunakan barangnya, kita harus mengembalikannya ke owner (pemiliki) barangnya
+saat kita mencoba memodifikasi value dari reference, maka secara default hal ini tidak bisa dilakukan, jadi secara default reference adalah immutable, walaupun variable ownernya sendiri mutable
+
+// Mengubah Value Borrowing ( Error )
+
+fn change_value(value: &String) {
+    value.push_str("Test"); //Cannot borrow immutable local variable `value` as mutable
+}
+
+#[test]
+fn test_change_value(){
+    let mut value = String::from("Rai"); // walaupun di bagian sini di pasang mut atau di modifikasi pada bagian ini di modifikasi value.push_str("Test"); tidak boleh
+    change_value(&value);
+    println!("Value: {} ", value);
+}
+
+Bagaimana jika pada kasus diperbolehkan memodifikasi value dari references, maka kita bisa menggunakan mutable refenrece
+mutable reference adalah reference dengan tanda &mut, dimana artinya kita bisa memodifikasi value dari reference tersebut
+namun ada ketentuan jika bisa menggunakan mutable reference, variable owner juga harus mutable, jika variable owner adalah immutable, maka mutable reference tidak bisa dilakukan
+selain itu, untuk menjamin keamanan, dalam satu waktu, hanya diperbolehkan membuat satu mutable reference, dan tidak ada reference lainnya
+kalau membuat mutable references hany boleh membuat satu mutable reference jadi tidak boleh membuat reference yang lain baik yang mutable ataupun immutable, karna untuk menjamin keamanan datanya
+agar untuk menjaga datanya agar tetap konsisten
+
+// Mutable Reference
+
+fn change_value(value: &mut String) {
+    value.push_str("Test"); //Cannot borrow immutable local variable `value` as mutable
+}
+
+#[test]
+fn test_change_value(){
+    let mut value = String::from("Rai"); // walaupun di bagian sini di pasang mut atau di modifikasi pada bagian ini di modifikasi value.push_str("Test"); tidak boleh
+    change_value(&mut value);
+    println!("Value: {} ", value);
+}
+
+lalu kalau di bagian ini tidak mut
+ let value = String::from("Rai"); // Cannot borrow immutable local variable `value` as mutable
+
+ maka akan muncul error
+
+ Cannot borrow immutable local variable `value` as mutable
+
+*/
+
+// Mengubah Value Borrowing ( Error )
+
+fn change_value(value: &mut String) {
+    value.push_str("Test"); //Cannot borrow immutable local variable `value` as mutable
+}
+
+#[test]
+fn test_change_value(){
+    let mut value = String::from("Rai"); // walaupun di bagian sini di pasang mut atau di modifikasi pada bagian ini di modifikasi value.push_str("Test"); tidak boleh
+    change_value(&mut value);
+    println!("Value: {} ", value);
+}
+
+/*
+Mutable Reference
+Bagaimana jika pada kasus diperbolehkan memodifikasi value dari references, maka kita bisa menggunakan mutable refenrece
+mutable reference adalah reference dengan tanda &mut, dimana artinya kita bisa memodifikasi value dari reference tersebut
+namun ada ketentuan jika bisa menggunakan mutable reference, variable owner juga harus mutable, jika variable owner adalah immutable, maka mutable reference tidak bisa dilakukan
+selain itu, untuk menjamin keamanan, dalam satu waktu, hanya diperbolehkan membuat satu mutable reference, dan tidak ada reference lainnya
+kalau membuat mutable references hany boleh membuat satu mutable reference jadi tidak boleh membuat reference yang lain baik yang mutable ataupun immutable, karna untuk menjamin keamanan datanya
+agar untuk menjaga datanya agar tetap konsisten
+*/
+
+// Mutable Reference
+
+fn change_value_mutable(value: &mut String) {
+    value.push_str("Test"); //Cannot borrow immutable local variable `value` as mutable
+}
+
+#[test]
+fn test_change_value_mutable(){
+    // let value = String::from("Rai"); // Cannot borrow immutable local variable `value` as mutable
+    let mut value = String::from("Rai"); // walaupun di bagian sini di pasang mut atau di modifikasi pada bagian ini di modifikasi value.push_str("Test"); tidak boleh
+
+   /*  Contoh tidak boleh ada
+
+    let value_borrow1 = &mut value; // Cannot borrow immutable local variable `valueBorrow1` as mutable
+    let value_borrow2 = &mut value; // Cannot borrow immutable local variable `valueBorrow2` as mutable
+
+    kode di atas tidak di perbolehkan karna lifecycle dua variable tersebut masih di dalam scope yang sama
+    dan maka variable yang kedua  let value_borrow2 = &mut value; akan error dan tidak di izinkan, karna masih ada
+    sifat mutable reference di dalamnya yang variable ini  let valueBorrow1 = &mut value;
+
+    error[E0499]: cannot borrow `value` as mutable more than once at a time
+    --> src/main.rs:1891:24
+     |
+1890 |     let value_borrow1 = &mut value;
+     |                        ---------- first mutable borrow occurs here
+1891 |     let value_borrow2 = &mut value;
+     |                        ^^^^^^^^^^ second mutable borrow occurs here
+1892 |     change_value(&mut valueBorrow1);
+     |                  ----------------- first borrow later used here
+
+
+    nah bagaimana jika kita menggunakan salah satu immutable di dalamnya seperti ini
+      let value_borrow1 = &mut value;
+      let value_borrow2 = &value;
+
+     maka dia tidak di perbolehkan sifat dari mutable reference hanya ada satu mutable reference saja, karna pada satu waktu kalau satunya mutable itu cuman boleh satu mutable saja, jadi tidak boleh ada yang immutable
+error[E0502]: cannot borrow `value` as immutable because it is also borrowed as mutable
+    --> src/main.rs:1921:25
+     |
+1920 |     let value_borrow1 = &mut value;
+     |                         ---------- mutable borrow occurs here
+1921 |     let value_borrow2 = &value;
+     |                         ^^^^^^ immutable borrow occurs here
+1922 |     change_value(&mut value_borrow1);
+     |                  ------------------ mutable borrow later used here
+
+    bagaimana kalau dua duanya memakai immutable variable di dalamnya, itu di perbolehkan
+
+     let value_borrow1 = &value;
+     let value_borrow2 = &value;
+
+    dia hanya muncul warning saja karna tidak di gunakan variablenya
+    warning: unused variable: `value_borrow1`
+    --> src/main.rs:1921:9
+     |
+1921 |     let value_borrow1 = &value;
+     |         ^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_value_borrow1`
+     |
+     = note: `#[warn(unused_variables)]` on by default
+
+warning: unused variable: `value_borrow2`
+    --> src/main.rs:1922:9
+     |
+1922 |     let value_borrow2 = &value;
+     |         ^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_value_borrow2`
+
+warning: variable does not need to be mutable
+    --> src/main.rs:1878:9
+     |
+1878 |     let mut value = String::from("Rai"); // walaupun di bagian sini di pasang mut atau di modifikasi pada bagian ini di modifikasi value....
+     |         ----^^^^^
+     |         |
+     |         help: remove this `mut`
+     |
+     = note: `#[warn(unused_mut)]` on by default
+
+warning: function `change_value_mutable` is never used
+    --> src/main.rs:1871:4
+     |
+1871 | fn change_value_mutable(value: &mut String) {
+     |    ^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: `#[warn(dead_code)]` on by default
+
+warning: `belajar-rust-dasar` (bin "belajar-rust-dasar" test) generated 5 warnings (run `cargo fix --bin "belajar-rust-dasar" --tests` to apply 1 suggestion)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.01s
+     Running unittests src/main.rs (target/debug/deps/belajar_rust_dasar-f15fb2cbc2ebbe87)
+Value: RaiTest
+
+Process finished with exit code 0
+
+
+   */
+
+    let value_borrow = &mut value;
+    change_value(value_borrow);
+    change_value(value_borrow);
+    change_value(value_borrow);
+
+    /*
+    di saat kita melakukan pemanggilan berkali kali seperti ini
+    change_value(&mut value);
+    change_value(&mut value);
+    change_value(&mut value);
+
+    itu di perbolehkan karna alur hidup di dalam rust itu bergantung pada kehidupan scopenya
+
+    */
+    // change_value(&mut value);
+    println!("Value: {} ", value);
+}
+
+/*
+Dangling Pointer
+Dangling pointer adalah kondisi dimana ada reference (pointer) yang menunjuk ke value yang tidak ada di memory
+https://en.wikipedia.org/wiki/Dangling_pointer
+Di Rust, hal ini tidak di perbolehkan, contoh ketika mengembalikan reference dalam funciton, maka secara otomatis value akan di hapus karena sudah keluar dari scope funciton
+pada kasus seperti ini, Rust akan menganggap hal ini error, karena berpotensi terjadi dangling pointer
+Biasanya programmer Golang sering sekali membuat function yang mengembalikan pointer
+
+# missing lifetime specifier
+
+fn dangling_pointer_full_name(first_name: &String, last_name: &String) -> &String { // Missing lifetime specifier [E0106] ini tidak di perbolehkan
+    let name = format!("{} {}", first_name, last_name);
+    return &name;
+}
+
+#[test]
+fn test_dangling_full_name(){
+    let first_name = String::from("Rai");
+    let last_name = String::from("Ardila");
+
+    let name = dangling_pointer_full_name(&first_name, &last_name); // Value Moved here
+    println!("Name: {}", name);
+    // println!("{}", first_name);
+    // println!("{}", last_name);
+
+}
+
+
+error[E0106]: missing lifetime specifier
+    --> src/main.rs:1990:75
+     |
+1990 | fn dangling_pointer_full_name(first_name: &String, last_name: &String) -> &String { // Missing lifetime specifier [E0106] ini tidak di pe...
+     |                                           -------             -------     ^ expected named lifetime parameter
+     |
+     = help: this function's return type contains a borrowed value, but the signature does not say whether it is borrowed from `first_name` or `last_name`
+help: consider introducing a named lifetime parameter
+     |
+1990 | fn dangling_pointer_full_name<'a>(first_name: &'a String, last_name: &'a String) -> &'a String { // Missing lifetime specifier [E0106] ini tidak di perbolehkan
+
+
+Solution Dangling Pointer
+Jika memang dat ayang dikembalikan dibuat di dalam funciton, maka kita harus kembalikan dalam bentuk value langsung, bukan reference
+atua kita bisa mengeluarkan variable owner dari value diluar function, agar masuk variable scope, sehingga Rust tidak menghapus variable dan value tersebut setelah function selesai di eksekusi
+
+fn dangling_pointer_full_name(first_name: &String, last_name: &String) -> String { // Missing lifetime specifier [E0106] ini tidak di perbolehkan
+    let name = format!("{} {}", first_name, last_name);
+    return name;
+}
+
+#[test]
+fn test_dangling_full_name(){
+    let first_name = String::from("Rai");
+    let last_name = String::from("Ardila");
+
+    let name = dangling_pointer_full_name(&first_name, &last_name); // Value Moved here
+    println!("Name: {}", name);
+    println!("{}", first_name);
+    println!("{}", last_name);
+
+}
+
+maka ownershipnya akan pindah ke
+ let name
+
+*/
+
+fn dangling_pointer_full_name(first_name: &String, last_name: &String) -> String { // Missing lifetime specifier [E0106] ini tidak di perbolehkan
+    let name = format!("{} {}", first_name, last_name);
+    return name;
+}
+
+#[test]
+fn test_dangling_full_name(){
+    let first_name = String::from("Rai");
+    let last_name = String::from("Ardila");
+
+    let name = dangling_pointer_full_name(&first_name, &last_name); // Value Moved here
+    println!("Name: {}", name);
+    println!("{}", first_name);
+    println!("{}", last_name);
+
+}
+
+/*
+Slice
+Slice adalah reference ke sebagian elemen dari data collection ( misal array)
+Karena slice adalah reference, jadi dia tidak punya ownership
+Contoh misal kita punya array dengan total data 10, kita mau ambil 5 data terdepan, maka kita bisa membuat slice sebagai reference data dari data ke 1 - ke 5
+
+Range
+Saat kita ingin mengambil sebagian data Collection, kita butuh menentukan range untuk Slice yang akan kita ambil
+Rust sendiri memiliki banyak jenis range, sebelumnya kita sudah bahas Range (exclusive) dan Range Inclusive, selain itu masih ada yang lain
+https://doc.rust-lang.org/std/ops/index.html#structs
+
+Reminder semua reference datanya di copy
+*/
+
+#[test]
+fn slice_reference(){
+    // let array: [i32; 10] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    let array: [i32; 10] = [1;10];
+    let slice1: &[i32] = &array[..];
+    println!("Slice1: {:?}", slice1);
+
+    let slice2: &[i32] = &array[0..5];
+    println!("Slice2: {:?}", slice2);
+
+    let slice3: &[i32] = &array[5..];
+    println!("Slice3: {:?}", slice3);
+}
+
+/*
+String Slice
+*/
