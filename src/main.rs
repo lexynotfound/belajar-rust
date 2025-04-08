@@ -1608,6 +1608,7 @@ fn test_hi(){
     println!("Number: {}", number);
 
     // kode dibawah ini akan error karna valuenya sudah di pindah di hi(name)
+    //karna ketika tipe data dari heap kalian kirimkan ke parameter otomatis ownershipnya di ganti ke parameter tersebut, ketika parameter tersebut tidak dapat di akses lagi di dalam functionnya otomatis datanya akan hilang
     let name = String::from("Rai");
     hi(name); // Value Moved here
     println!("Name: {}", name); // name di samping ini dia akan error yang di karenkan namenya sudah tidak ada data lagi di dalamnya
@@ -1617,7 +1618,9 @@ fn test_hi(){
 #sebenernya ownership name rai ini di pindahkan kepada parameter ini nmae: String
 fn hi(nmae: String){
     println!("Hi, {}", nmae);
+
 }
+
 */
 
 //Funciton Ownership
@@ -1639,4 +1642,6 @@ fn test_hi(){
     hi(name); // Value Moved here
     // println!("Name: {}", name); // this code got error because Value used after being moved [E0382]
 }
+
+
 
